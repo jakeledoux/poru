@@ -40,22 +40,22 @@ const polls = [
       {
         id: 0,
         text: "season 1",
-        votes: 0,
+        votes: 1509,
       },
       {
         id: 1,
         text: "season 2",
-        votes: 0,
+        votes: 1145,
       },
       {
         id: 2,
         text: "season 3",
-        votes: 0,
+        votes: 865,
       },
       {
         id: 3,
         text: "season 4",
-        votes: 0,
+        votes: 533,
       },
     ],
   },
