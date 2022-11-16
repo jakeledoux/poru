@@ -11,11 +11,11 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import _ from "lodash";
 import { gql, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
-import { useFormik } from "formik";
+import { FieldArray, Form, Formik } from "formik";
 
 const CREATE_POLL = gql`
   mutation CreatePoll($title: String!, $options: [String]!) {
@@ -25,17 +25,12 @@ const CREATE_POLL = gql`
   }
 `;
 
-function validatePoll(title: string, options: string[]) {
-  title = title.trim();
-  if (!title.length) {
-    return [false, "title cannot be blank!"];
-  }
-  options = options.map((option) => option.trim()).filter((option) => option);
-  if (options.length < 2) {
-    return [false, "not enough options!"];
-  }
-
-  return [true, null];
+function Error(props: { value: string | string[] | undefined }) {
+  return typeof props.value === "string" ? (
+    <Text color="red.500">{props.value}</Text>
+  ) : (
+    <></>
+  );
 }
 
 function Create() {
@@ -48,74 +43,104 @@ function Create() {
     }
   }, [mutation]);
 
-  const formik = useFormik({
-    initialValues: {
-      title: "",
-      options: [""],
-    },
-    onSubmit: (value) => {
-      alert(JSON.stringify(value));
-    },
-  });
-
   return (
     <>
-      <form onSubmit={formik.handleSubmit}>
-        <Heading>Create Poll</Heading>
-        <Center>
-          <Card width="30em" padding={4}>
-            <VStack align="left">
-              <FormControl>
-                <FormLabel htmlFor="title">Poll title</FormLabel>
-                <Input
-                  id="title"
-                  name="title"
-                  placeholder="ポルの題名"
-                  onChange={formik.handleChange}
-                  value={formik.values.title}
-                />
-              </FormControl>
-              <Divider />
-              <Text>Options</Text>
-              {formik.values.options.map((option, i) => (
-                <Flex key={i}>
-                  <Input
-                    id={`options[${i}]`}
-                    name={`options[${i}]`}
-                    placeholder={`オプション ${i + 1}`}
-                    value={option}
-                    onChange={formik.handleChange}
-                    borderRightRadius={0}
-                    borderRight="hidden"
+      <Formik
+        initialValues={{
+          title: "",
+          options: [""],
+        }}
+        onSubmit={(values) => {
+          createPoll({ variables: values });
+        }}
+        validate={(values) => {
+          let errors: any = {};
+
+          let title = values.title.trim();
+          if (!title.length) {
+            errors.title = "Required";
+          }
+          let options = values.options
+            .map((option) => option.trim())
+            .filter((option) => option);
+          if (options.length < 2) {
+            errors.options = "Provide at least two options";
+          }
+
+          return errors;
+        }}
+      >
+        {({ values, errors, handleChange, isValid, dirty }) => (
+          <Form>
+            <Heading>Create Poll</Heading>
+            <Center>
+              <Card width="30em" padding={4}>
+                <VStack align="left">
+                  <FormControl>
+                    <FormLabel htmlFor="title">Poll title</FormLabel>
+                    <Input
+                      autoFocus
+                      id="title"
+                      name="title"
+                      placeholder="ポルの題名"
+                      onChange={handleChange}
+                      value={values.title}
+                      isInvalid={!!errors.title}
+                    />
+                    <Error value={errors.title} />
+                  </FormControl>
+                  <Divider />
+                  <FieldArray
+                    name="options"
+                    render={(arrayHelpers) => (
+                      <>
+                        <Text>Options</Text>
+                        <Error value={errors.options} />
+                        {values.options.map((option, i) => (
+                          <Flex key={i}>
+                            <Input
+                              id={`options[${i}]`}
+                              name={`options[${i}]`}
+                              placeholder={`オプション ${i + 1}`}
+                              value={option}
+                              onChange={handleChange}
+                              borderRightRadius={0}
+                              borderRight="hidden"
+                            />
+                            <Button
+                              colorScheme="red"
+                              variant="outline"
+                              isDisabled={values.options.length == 1}
+                              borderLeftRadius={0}
+                              onClick={() => arrayHelpers.remove(i)}
+                            >
+                              X
+                            </Button>
+                          </Flex>
+                        ))}
+                        <Button onClick={() => arrayHelpers.push("")}>
+                          Add Option
+                        </Button>
+                      </>
+                    )}
                   />
+
+                  <Divider />
+
                   <Button
-                    colorScheme="red"
-                    variant="outline"
-                    isDisabled={formik.values.options.length == 1}
-                    borderLeftRadius={0}
-                    onClick={() => {
-                      // todo: remove option
-                    }}
+                    colorScheme="teal"
+                    isDisabled={!isValid || !dirty}
+                    isLoading={mutation.loading}
+                    type="submit"
                   >
-                    X
+                    Publish
                   </Button>
-                </Flex>
-              ))}
-              <Button onClick={() => {}}>Add Option</Button>
-
-              <Divider />
-
-              <Button
-                colorScheme="teal"
-                isLoading={mutation.loading}
-                type="submit"
-              >
-                Publish poll
-              </Button>
-            </VStack>
-          </Card>
-        </Center>
-      </form>
+                </VStack>
+              </Card>
+            </Center>
+          </Form>
+        )}
+      </Formik>
     </>
   );
 }
