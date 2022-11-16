@@ -8,11 +8,14 @@
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
+  "proxy": "https://localhost:4000",
   "dependencies": {
+    "@apollo/client": "^3.7.1",
     "@chakra-ui/react": "^2.4.1",
     "@emotion/react": "^11.10.5",
     "@emotion/styled": "^11.10.5",
     "framer-motion": "^7.6.7",
+    "graphql": "^16.6.0",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
