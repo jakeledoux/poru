@@ -9,6 +9,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import { useLoaderData } from "react-router-dom";
 
 type PollOption = {
   text: string;
@@ -20,11 +21,11 @@ type Poll = {
   options: PollOption[];
 };
 
-function ViewPoll() {
-  let [hasVoted, setHasVoted] = useState(false);
-  let [vote, setVote] = useState<string | undefined>(undefined);
-
-  let poll: Poll = {
+export function pollLoader({ params }: any): Poll | null {
+  if (params.pollId != 0) {
+    throw new Response("Not Found", { status: 404 });
+  }
+  return {
     title: "Which Portal is better?",
     options: [
       {
@@ -37,6 +38,13 @@ function ViewPoll() {
       },
     ],
   };
+}
+
+function ViewPoll() {
+  let [hasVoted, setHasVoted] = useState(false);
+  let [vote, setVote] = useState<string | undefined>(undefined);
+
+  const poll = useLoaderData() as Poll;
 
   return (
     <>

@@ -6,7 +6,7 @@ import ErrorPage from "./ErrorPage";
 import "./index.css";
 import Create from "./routes/Create";
 import Home from "./routes/Home";
-import ViewPoll from "./routes/ViewPoll";
+import ViewPoll, { pollLoader } from "./routes/ViewPoll";
 
 const router = createBrowserRouter([
   {
@@ -19,8 +19,9 @@ const router = createBrowserRouter([
     element: <Create />,
   },
   {
-    path: "poll/:pollID",
+    path: "poll/:pollId",
     element: <ViewPoll />,
+    loader: pollLoader,
   },
 ]);
 
