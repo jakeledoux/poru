@@ -1,17 +1,21 @@
 import {
-  Box,
   Button,
-  ButtonGroup,
   Card,
+  Center,
   Divider,
+  Flex,
+  FormControl,
+  FormLabel,
   Heading,
   Input,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import _ from "lodash";
 import { gql, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
 
 const CREATE_POLL = gql`
   mutation CreatePoll($title: String!, $options: [String]!) {
@@ -35,9 +39,6 @@ function validatePoll(title: string, options: string[]) {
 }
 
 function Create() {
-  let [title, setTitle] = useState("");
-  let [options, setOptions] = useState(["", ""]);
-
   const navigate = useNavigate();
   const [createPoll, mutation] = useMutation(CREATE_POLL);
 
@@ -47,60 +48,74 @@ function Create() {
     }
   }, [mutation]);
 
+  const formik = useFormik({
+    initialValues: {
+      title: "",
+      options: [""],
+    },
+    onSubmit: (value) => {
+      alert(JSON.stringify(value));
+    },
+  });
+
   return (
     <>
-      <Heading>Create Poll</Heading>
-      <Card>
-        <Text>Poll Title</Text>
-        <Input
-          placeholder="Poll title"
-          value={title}
-          onChange={(event) => setTitle(event.target.value)}
-        />
-        <Divider />
-        <Text>Options</Text>
-        {options.map((option, i) => (
-          <Box key={i}>
-            <Input
-              placeholder={`Option ${i + 1}`}
-              value={option}
-              onChange={(event) => {
-                let newOptions = options.slice();
-                newOptions[i] = event.target.value;
-                setOptions(newOptions);
-              }}
-            />
-            <Button
-              isDisabled={options.length == 1}
-              onClick={() => {
-                let newOptions = options.slice();
-                _.pullAt(newOptions, i);
-                setOptions(newOptions);
-              }}
-            >
-              X
-            </Button>
-          </Box>
-        ))}
+      <form onSubmit={formik.handleSubmit}>
+        <Heading>Create Poll</Heading>
+        <Center>
+          <Card width="30em" padding={4}>
+            <VStack align="left">
+              <FormControl>
+                <FormLabel htmlFor="title">Poll title</FormLabel>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="ポルの題名"
+                  onChange={formik.handleChange}
+                  value={formik.values.title}
+                />
+              </FormControl>
+              <Divider />
+              <Text>Options</Text>
+              {formik.values.options.map((option, i) => (
+                <Flex key={i}>
+                  <Input
+                    id={`options[${i}]`}
+                    name={`options[${i}]`}
+                    placeholder={`オプション ${i + 1}`}
+                    value={option}
+                    onChange={formik.handleChange}
+                    borderRightRadius={0}
+                    borderRight="hidden"
+                  />
+                  <Button
+                    colorScheme="red"
+                    variant="outline"
+                    isDisabled={formik.values.options.length == 1}
+                    borderLeftRadius={0}
+                    onClick={() => {
+                      // todo: remove option
+                    }}
+                  >
+                    X
+                  </Button>
+                </Flex>
+              ))}
+              <Button onClick={() => {}}>Add Option</Button>
 
-        {/* resize list */}
-        <ButtonGroup>
-          <Button onClick={() => setOptions(options.concat(""))}>Add</Button>
-        </ButtonGroup>
-      </Card>
+              <Divider />
 
-      <Button
-        isLoading={mutation.loading}
-        onClick={() => {
-          let [valid, message] = validatePoll(title, options);
-          if (!valid) {
-            return alert(message);
-          }
-          createPoll({ variables: { title: title, options: options } });
-        }}
-      >
-        Publish poll
-      </Button>
+              <Button
+                colorScheme="teal"
+                isLoading={mutation.loading}
+                type="submit"
+              >
+                Publish poll
+              </Button>
+            </VStack>
+          </Card>
+        </Center>
+      </form>
     </>
   );
 }
