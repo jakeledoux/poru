@@ -11,11 +11,12 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import _ from "lodash";
 import { gql, useMutation } from "@apollo/client";
 import { useNavigate } from "react-router-dom";
 import { FieldArray, Form, Formik } from "formik";
+import { AddIcon, CloseIcon, SmallCloseIcon } from "@chakra-ui/icons";
 
 const CREATE_POLL = gql`
   mutation CreatePoll($title: String!, $options: [String]!) {
@@ -53,6 +54,7 @@ function Create() {
         onSubmit={(values) => {
           createPoll({ variables: values });
         }}
+        validateOnMount={false}
         validate={(values) => {
           let errors: any = {};
 
@@ -87,7 +89,7 @@ function Create() {
                       value={values.title}
                       isInvalid={!!errors.title}
                     />
-                    <Error value={errors.title} />
+                    {/* <Error value={errors.title} /> */}
                   </FormControl>
                   <Divider />
                   <FieldArray
@@ -95,7 +97,7 @@ function Create() {
                     render={(arrayHelpers) => (
                       <>
                         <Text>Options</Text>
-                        <Error value={errors.options} />
+                        {/* <Error value={errors.options} /> */}
                         {values.options.map((option, i) => (
                           <Flex key={i}>
                             <Input
@@ -108,18 +110,24 @@ function Create() {
                               borderRight="hidden"
                             />
                             <Button
-                              colorScheme="red"
+                              colorScheme="gray"
                               variant="outline"
                               isDisabled={values.options.length == 1}
                               borderLeftRadius={0}
                               onClick={() => arrayHelpers.remove(i)}
                             >
-                              X
+                              <SmallCloseIcon
+                                color={
+                                  values.options.length == 1
+                                    ? "blackAlpha.200"
+                                    : "red.500"
+                                }
+                              />
                             </Button>
                           </Flex>
                         ))}
                         <Button onClick={() => arrayHelpers.push("")}>
-                          Add Option
+                          <AddIcon />
                         </Button>
                       </>
                     )}

@@ -20,7 +20,12 @@ function Header() {
         marginBottom="1em"
       >
         <Breadcrumb separator="•">
-          <BreadcrumbItem isCurrentPage={location.pathname.toString() == "/"}>
+          <BreadcrumbItem>
+            <BreadcrumbLink as={Link} to="/">
+              poru!
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
             <BreadcrumbLink as={Link} to="/">
               ホム
             </BreadcrumbLink>
@@ -28,6 +33,11 @@ function Header() {
           <BreadcrumbItem>
             <BreadcrumbLink as={Link} to="/create">
               クリエイト
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbItem>
+            <BreadcrumbLink as={Link} to="/about">
+              サイトの約
             </BreadcrumbLink>
           </BreadcrumbItem>
         </Breadcrumb>

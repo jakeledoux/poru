@@ -6,6 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import ErrorPage from "./ErrorPage";
 import "./index.css";
 import Layout from "./Layout";
+import About from "./routes/About";
 import Create from "./routes/Create";
 import Home from "./routes/Home";
 import ViewPoll from "./routes/ViewPoll";
@@ -25,6 +26,10 @@ const router = createBrowserRouter([
       {
         path: "/create",
         element: <Create />,
+      },
+      {
+        path: "/about",
+        element: <About />,
       },
       {
         path: "/poll/:pollId",
