@@ -24,7 +24,7 @@ export function BodyCard(props: any) {
 
   return (
     <Center>
-      <Card padding={4} {...cardProps}>
+      <Card backgroundColor="white" padding={4} {...cardProps}>
         <VStack align="left">
           {!!props.title && (
             <>

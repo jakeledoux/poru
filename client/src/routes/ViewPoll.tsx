@@ -14,15 +14,12 @@ import {
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { BodyCard } from "../components";
-import { pluralize } from "../utils";
+import { formatTs, pluralize } from "../utils";
 
 const CAST_VOTE = gql`
   mutation CastVote($pollId: Int!, $optionId: Int!) {
     vote(pollId: $pollId, optionId: $optionId) {
-      id
-      title
       options {
-        id
         text
         votes
       }
@@ -32,6 +29,8 @@ const CAST_VOTE = gql`
 const GET_POLL = gql`
   query GetPoll($pollId: Int!) {
     poll(id: $pollId) {
+      id
+      created
       title
       options {
         text
@@ -47,6 +46,8 @@ type PollOption = {
 };
 
 type Poll = {
+  id: number;
+  created: string;
   title: string;
   options: PollOption[];
 };
@@ -93,7 +94,7 @@ function ViewPoll() {
           title={poll.title}
           size="lg"
           tags={[
-            "November 18th, 2022",
+            formatTs(poll.created),
             `${totalVotes.toLocaleString()} ${pluralize("vote", totalVotes)}`,
           ]}
         >

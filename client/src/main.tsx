@@ -9,7 +9,6 @@ import Layout from "./Layout";
 import About from "./routes/About";
 import Create from "./routes/Create";
 import Home from "./routes/Home";
-import Random from "./routes/Random";
 import ViewPoll from "./routes/ViewPoll";
 
 const client = new ApolloClient({
@@ -41,6 +40,13 @@ const router = createBrowserRouter([
 ]);
 
 const theme = extendTheme({
+  styles: {
+    global: {
+      body: {
+        bg: "#FAFAFA",
+      },
+    },
+  },
   colors: {
     primary: {
       main: "teal",

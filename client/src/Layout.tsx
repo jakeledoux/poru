@@ -29,7 +29,7 @@ function Header() {
   );
 
   return (
-    <Box padding="1em" width="100vw" paddingTop="0">
+    <Box padding="1em" minHeight="100vh" width="100vw" paddingTop="0">
       <Box
         bg={theme.colors.secondary.main}
         paddingX="1em"

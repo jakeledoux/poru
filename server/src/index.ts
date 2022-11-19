@@ -11,6 +11,7 @@ const { json } = pkg;
 const typeDefs = `#graphql
   type Poll {
     id: Int!
+    created: String!
     title: String!
     options: [Option]!
   }
@@ -36,6 +37,7 @@ const typeDefs = `#graphql
 let polls = [
   {
     id: 0,
+    created: "1668820549000",
     title: "which attack on titan season is best?",
     options: [
       {
@@ -106,6 +108,7 @@ const resolvers = {
       // create poll
       let poll = {
         id: polls.length,
+        created: new Date().getTime().toString(),
         title: args.title,
         options: args.options.map((option, i) => ({
           id: i,

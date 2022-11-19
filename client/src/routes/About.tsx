@@ -12,7 +12,7 @@ import { BodyCard } from "../components";
 
 function TechList(props: { title: string; items: [string, string, string][] }) {
   return (
-    <Box marginLeft={3} paddingLeft={3} borderLeft="2px solid teal">
+    <Box paddingLeft={3} borderLeft="2px solid teal">
       <Heading size="md">{props.title}</Heading>
       <Divider marginBottom={2} />
       <UnorderedList width="30em">
