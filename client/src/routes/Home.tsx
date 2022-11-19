@@ -16,7 +16,7 @@ function Home() {
       <Center>
         <HStack>
           <Box>
-            <Heading>welcome to poru.</Heading>
+            <Heading color="#3a180d">welcome to poru.</Heading>
             <Link color="teal" as={RouterLink} to="/create">
               create a poll?
             </Link>

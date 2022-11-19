@@ -35,6 +35,7 @@ function Header() {
         paddingX="1em"
         marginX="-1em"
         marginBottom="1em"
+        sx={{ boxShadow: "0 2px 0 0 #EEE" }}
       >
         <HStack height="3em">
           <Heading
