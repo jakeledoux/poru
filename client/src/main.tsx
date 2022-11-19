@@ -40,6 +40,13 @@ const router = createBrowserRouter([
 ]);
 
 const theme = extendTheme({
+  components: {
+    Heading: {
+      baseStyle: {
+        color: "#373332",
+      },
+    },
+  },
   styles: {
     global: {
       body: {

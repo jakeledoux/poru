@@ -4,11 +4,12 @@ import {
   Heading,
   Link,
   ListItem,
+  Spacer,
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
-import { BodyCard } from "../components";
+import { BodyCard, Note } from "../components";
 
 function TechList(props: { title: string; items: [string, string, string][] }) {
   return (
@@ -35,8 +36,8 @@ function About() {
       <BodyCard title="About">
         <Text>
           poru is a simple polling website to demonstrate abilities in web
-          development using React. this project utilizes the following
-          technologies:
+          development using React. this project utilizes a number of new (to me)
+          technologes, the most important of which are:
         </Text>
         <TechList
           title="Frontend"
@@ -67,12 +68,18 @@ function About() {
               "https://github.com/apollographql/apollo-server",
             ],
             [
-              "Yadayada",
-              "connecting to the database",
-              "https://github.com/remix-run/react-router",
+              "Kysely",
+              "handling database connections",
+              "https://github.com/koskimas/kysely",
             ],
           ]}
         />
+        <Text>and of course finally, React and TypeScript.</Text>
+        <Note>
+          Adding features and managing state while using this stack is much
+          cleaner and far easier than using Python/Flask/Jinja as I have
+          primarily done in the past.
+        </Note>
       </BodyCard>
     </>
   );
