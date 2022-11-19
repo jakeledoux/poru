@@ -4,7 +4,6 @@ import {
   Heading,
   Link,
   ListItem,
-  Spacer,
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
@@ -77,8 +76,8 @@ function About() {
         <Text>and of course finally, React and TypeScript.</Text>
         <Note>
           Adding features and managing state while using this stack is much
-          cleaner and far easier than using Python/Flask/Jinja as I have
-          primarily done in the past.
+          cleaner and far easier than with more "low-level" alternatives such as
+          Python/Flask/Jinja.
         </Note>
       </BodyCard>
     </>
