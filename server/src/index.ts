@@ -24,6 +24,7 @@ const typeDefs = `#graphql
   type Query {
     polls: [Poll]
     poll(id: Int!): Poll
+    random: Poll
   }
 
   type Mutation {
@@ -32,7 +33,7 @@ const typeDefs = `#graphql
   }
 `;
 
-const polls = [
+let polls = [
   {
     id: 0,
     title: "which attack on titan season is best?",
@@ -66,6 +67,9 @@ const resolvers = {
     polls: () => polls,
     poll(_parent: any, args: { id: number }, _context: any, _info: any) {
       return polls[args.id];
+    },
+    random() {
+      return polls[Math.floor(Math.random() * polls.length)];
     },
   },
   Mutation: {

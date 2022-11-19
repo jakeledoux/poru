@@ -2,10 +2,8 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import {
   Box,
   Button,
-  Card,
   Center,
   Divider,
-  Heading,
   Progress,
   Radio,
   RadioGroup,
@@ -15,6 +13,8 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import { BodyCard } from "../components";
+import { pluralize } from "../utils";
 
 const CAST_VOTE = gql`
   mutation CastVote($pollId: Int!, $optionId: Int!) {
@@ -77,61 +77,71 @@ function ViewPoll() {
     throw new Response("Poll does not exist!", { status: 404 });
   }
   const poll = (mutation.data ? mutation.data.vote : data.poll) as Poll;
-  const mostVotes = poll.options
+  const totalVotes = poll.options
     .map((option) => option.votes)
-    .reduce((a, b) => (a > b ? a : b));
-  const voteScale = 100 / mostVotes;
+    .reduce((a, b) => a + b);
+  const mostVotes = Math.max(
+    1,
+    poll.options.map((option) => option.votes).reduce((a, b) => (a > b ? a : b))
+  );
+  const voteScale = 100 / totalVotes;
 
   return (
     <Center>
       <Stack direction="column">
-        <Card padding={4} width="50em">
-          <Heading>{poll.title}</Heading>
-          <Divider marginBottom={4} />
+        <BodyCard
+          title={poll.title}
+          size="lg"
+          tags={[
+            "November 18th, 2022",
+            `${totalVotes.toLocaleString()} ${pluralize("vote", totalVotes)}`,
+          ]}
+        >
           {viewResults ? (
             <Stack direction="column" divider={<Divider />}>
-              {poll.options.map((option, i) => (
-                <Box key={i}>
-                  <Text>{option.text}</Text>
-                  <Box position="relative">
-                    <Progress
-                      hasStripe={option.votes == mostVotes}
-                      colorScheme={
-                        option.votes == mostVotes ? "yellow" : "teal"
-                      }
-                      borderRadius={5}
-                      height="32px"
-                      value={option.votes * voteScale}
-                    />
-                    <Text
-                      color="white"
-                      top={0}
-                      bottom={0}
-                      marginY="auto"
-                      marginLeft={2}
-                      height="max-content"
-                      position="absolute"
-                      fontWeight="bold"
-                    >
-                      {option.votes.toLocaleString()} vote
-                      {option.votes == 1 ? "" : "s"}
-                    </Text>
-                    <Text
-                      color="white"
-                      top={0}
-                      bottom={0}
-                      right={0}
-                      marginY="auto"
-                      marginRight={2}
-                      height="max-content"
-                      position="absolute"
-                      fontWeight="bold"
-                    >
-                      {Math.round(option.votes * voteScale)}%
-                    </Text>
+              {poll.options.map((option, i) => {
+                let isWinner = option.votes == mostVotes;
+                return (
+                  <Box key={i}>
+                    <Text>{option.text}</Text>
+                    <Box position="relative">
+                      <Progress
+                        hasStripe={isWinner}
+                        colorScheme={isWinner ? "yellow" : "teal"}
+                        borderRadius={5}
+                        height="32px"
+                        value={option.votes * voteScale}
+                      />
+                      <Text
+                        color="white"
+                        top={0}
+                        bottom={0}
+                        marginY="auto"
+                        marginLeft={2}
+                        height="max-content"
+                        position="absolute"
+                        fontWeight="bold"
+                      >
+                        {option.votes.toLocaleString()}{" "}
+                        {pluralize("vote", option.votes)}
+                      </Text>
+                      <Text
+                        color="white"
+                        top={0}
+                        bottom={0}
+                        right={0}
+                        marginY="auto"
+                        marginRight={2}
+                        height="max-content"
+                        position="absolute"
+                        fontWeight="bold"
+                      >
+                        {Math.round(option.votes * voteScale)}%
+                      </Text>
+                    </Box>
                   </Box>
-                </Box>
-              ))}
+                );
+              })}
             </Stack>
           ) : (
             <RadioGroup
@@ -148,7 +158,7 @@ function ViewPoll() {
               </Stack>
             </RadioGroup>
           )}
-        </Card>
+        </BodyCard>
         {!viewResults && (
           <>
             <Button
@@ -164,14 +174,14 @@ function ViewPoll() {
                 })
               }
             >
-              vote
+              Vote
             </Button>
             <Button
               colorScheme="blackAlpha"
               variant="outline"
               onClick={() => setSkipVote(true)}
             >
-              view results
+              Skip to Results
             </Button>
           </>
         )}

@@ -1,94 +1,79 @@
 import {
-  Card,
-  Center,
+  Box,
   Divider,
   Heading,
   Link,
   ListItem,
   Text,
   UnorderedList,
-  VStack,
 } from "@chakra-ui/react";
 import { Link as RouterLink } from "react-router-dom";
+import { BodyCard } from "../components";
+
+function TechList(props: { title: string; items: [string, string, string][] }) {
+  return (
+    <Box marginLeft={3} paddingLeft={3} borderLeft="2px solid teal">
+      <Heading size="md">{props.title}</Heading>
+      <Divider marginBottom={2} />
+      <UnorderedList width="30em">
+        {props.items.map(([name, reason, link], i) => (
+          <ListItem key={i}>
+            <Link as={RouterLink} to={link} isExternal>
+              {name}
+            </Link>{" "}
+            for {reason}
+          </ListItem>
+        ))}
+      </UnorderedList>
+    </Box>
+  );
+}
 
 function About() {
   return (
     <>
-      <VStack align="left">
-        <Heading>About</Heading>
-        <Divider />
+      <BodyCard title="About">
         <Text>
           poru is a simple polling website to demonstrate abilities in web
           development using React. this project utilizes the following
           technologies:
         </Text>
-        <VStack gap={1}>
-          <Card padding={4}>
-            <Heading size="md">Frontend</Heading>
-            <Divider marginBottom={2} />
-
-            <UnorderedList width="30em">
-              <ListItem>
-                <Link
-                  as={RouterLink}
-                  to="https://github.com/chakra-ui/chakra-ui"
-                  isExternal
-                >
-                  Chakra UI
-                </Link>{" "}
-                for UI components
-              </ListItem>
-              <ListItem>
-                <Link
-                  as={RouterLink}
-                  to="https://github.com/apollographql/apollo-client"
-                  isExternal
-                >
-                  Apollo Client
-                </Link>{" "}
-                for API queries
-              </ListItem>
-              <ListItem>
-                <Link
-                  as={RouterLink}
-                  to="https://github.com/remix-run/react-router"
-                  isExternal
-                >
-                  React Router
-                </Link>{" "}
-                for... routing react (allowing page navigation)
-              </ListItem>
-            </UnorderedList>
-          </Card>
-          <Card padding={4}>
-            <Heading size="md">Backend</Heading>
-            <Divider marginBottom={2} />
-
-            <UnorderedList width="30em">
-              <ListItem>
-                <Link
-                  as={RouterLink}
-                  to="https://github.com/apollographql/apollo-server"
-                  isExternal
-                >
-                  Apollo Server
-                </Link>{" "}
-                for providing the GraphQL API
-              </ListItem>
-              <ListItem>
-                <Link
-                  as={RouterLink}
-                  to="https://github.com/remix-run/react-router"
-                  isExternal
-                >
-                  Yadayada
-                </Link>{" "}
-                for connecting to the database
-              </ListItem>
-            </UnorderedList>
-          </Card>
-        </VStack>
-      </VStack>
+        <TechList
+          title="Frontend"
+          items={[
+            [
+              "Chakra UI",
+              "UI components",
+              "https://github.com/chakra-ui/chakra-ui",
+            ],
+            [
+              "Apollo Client",
+              "API queries",
+              "https://github.com/apollographql/apollo-client",
+            ],
+            [
+              "React Router",
+              "routing react (allowing page navigation)",
+              "https://github.com/remix-run/react-router",
+            ],
+          ]}
+        />
+        <TechList
+          title="Backend"
+          items={[
+            [
+              "Apollo Server",
+              "providing the GraphQL API",
+              "https://github.com/apollographql/apollo-server",
+            ],
+            [
+              "Yadayada",
+              "connecting to the database",
+              "https://github.com/remix-run/react-router",
+            ],
+          ]}
+        />
+      </BodyCard>
     </>
   );
 }
