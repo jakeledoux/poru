@@ -1,12 +1,55 @@
 import { ApolloServer } from "@apollo/server";
 import { expressMiddleware } from "@apollo/server/express4";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
+import Database from "better-sqlite3";
 import pkg from "body-parser";
 import cors from "cors";
 import express from "express";
 import http from "http";
+import { Generated, Kysely, SqliteDialect } from "kysely";
 
 const { json } = pkg;
+
+// BEGIN SQL
+
+interface PollTable {
+  id: Generated<number>;
+  created: string;
+  title: string;
+}
+
+interface OptionTable {
+  id: Generated<number>;
+  poll_id: number;
+  text: string;
+  votes: number;
+}
+
+interface PoruDatabase {
+  polls: PollTable;
+  options: OptionTable;
+}
+
+const db = new Kysely<PoruDatabase>({
+  dialect: new SqliteDialect({ database: new Database("poru.db") }),
+});
+
+function buildPoll(
+  poll: { id: number; created: string; title: string },
+  options: import("kysely").Selection<
+    import("kysely/dist/cjs/parser/table-parser").From<PoruDatabase, "options">,
+    "options",
+    "options.id" | "options.text" | "options.votes"
+  >[]
+) {
+  return {
+    id: poll.id,
+    created: poll.created,
+    title: poll.title,
+    options: options,
+  };
+}
+// END SQL
 
 const typeDefs = `#graphql
   type Poll {
@@ -23,104 +66,102 @@ const typeDefs = `#graphql
   }
 
   type Query {
-    polls: [Poll]
     poll(id: Int!): Poll
     random: Poll
   }
 
   type Mutation {
-    vote(pollId: Int!, optionId: Int!): Poll
+    vote(pollId: Int!, optionId: Int!): Option!
     createPoll(title: String!, options: [String]!): Poll
   }
 `;
 
-let polls = [
-  {
-    id: 0,
-    created: "1668820549000",
-    title: "which attack on titan season is best?",
-    options: [
-      {
-        id: 0,
-        text: "season 1",
-        votes: 1509,
-      },
-      {
-        id: 1,
-        text: "season 2",
-        votes: 1145,
-      },
-      {
-        id: 2,
-        text: "season 3",
-        votes: 865,
-      },
-      {
-        id: 3,
-        text: "season 4",
-        votes: 533,
-      },
-    ],
-  },
-];
+async function getPoll(id: number) {
+  const poll = await db
+    .selectFrom("polls")
+    .selectAll()
+    .where("polls.id", "=", id)
+    .executeTakeFirst();
+
+  if (poll) {
+    const options = await db
+      .selectFrom("options")
+      .select(["options.id", "options.text", "options.votes"])
+      .where("options.poll_id", "=", id)
+      .execute();
+
+    return buildPoll(poll, options);
+  }
+}
 
 const resolvers = {
   Query: {
-    polls: () => polls,
-    poll(_parent: any, args: { id: number }, _context: any, _info: any) {
-      return polls[args.id];
+    async poll(_parent: any, args: { id: number }, _context: any, _info: any) {
+      return getPoll(args.id);
     },
-    random() {
-      return polls[Math.floor(Math.random() * polls.length)];
+    async random() {
+      const polls = await db.selectFrom("polls").select("id").execute();
+
+      if (polls) {
+        const poll = polls[Math.floor(Math.random() * polls.length)];
+        return getPoll(poll.id);
+      }
     },
   },
   Mutation: {
-    vote(
+    async vote(
       _parent: any,
       args: { pollId: number; optionId: number },
       _context: any,
       _info: any
     ) {
-      let poll = polls[args.pollId];
+      const option = await db
+        .selectFrom("options")
+        .select("options.votes")
+        // only filtering by pollId as a safety measure to prevent accidental misvotes
+        .where("options.poll_id", "=", args.pollId)
+        .where("options.id", "=", args.optionId)
+        .executeTakeFirstOrThrow();
 
-      // poll does not exist
-      if (poll == null) {
-        return poll;
-      }
-      // option does not exist
-      if (args.optionId >= poll.options.length) {
-        return null;
-      }
+      let votes = option.votes + 1;
 
-      // increment votes
-      poll.options[args.optionId].votes += 1;
-      // update poll store
-      polls[args.pollId] = poll;
+      const row = await db
+        .updateTable("options")
+        .set({ votes: votes })
+        .where("id", "=", args.optionId)
+        .returning(["options.id", "options.text", "options.votes"])
+        .executeTakeFirstOrThrow();
 
-      return poll;
+      return row;
     },
-    createPoll(
+    async createPoll(
       _parent: any,
       args: { title: string; options: string[] },
       _context: any,
       _info: any
     ) {
-      // create poll
-      let poll = {
-        id: polls.length,
-        created: new Date().getTime().toString(),
-        title: args.title,
-        options: args.options.map((option, i) => ({
-          id: i,
-          text: option,
-          votes: 0,
-        })),
-      };
+      const poll = await db
+        .insertInto("polls")
+        .values({
+          created: new Date().getTime().toString(),
+          title: args.title,
+        })
+        .returningAll()
+        .executeTakeFirstOrThrow();
 
-      // store poll
-      polls.push(poll);
+      const options = await db
+        .insertInto("options")
+        .values(
+          args.options.map((option) => ({
+            poll_id: poll.id,
+            text: option,
+            votes: 0,
+          }))
+        )
+        .returning(["options.id", "options.text", "options.votes"])
+        .execute();
 
-      return poll;
+      return buildPoll(poll, options);
     },
   },
 };

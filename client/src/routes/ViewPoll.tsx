@@ -1,28 +1,30 @@
 import { gql, useMutation, useQuery } from "@apollo/client";
+import { CheckIcon } from "@chakra-ui/icons";
 import {
   Box,
   Button,
   Center,
   Divider,
+  HStack,
   Progress,
   Radio,
   RadioGroup,
   Spinner,
   Stack,
+  Tag,
+  TagLeftIcon,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+import Cookies from "universal-cookie";
 import { BodyCard } from "../components";
 import { formatTs, pluralize } from "../utils";
 
 const CAST_VOTE = gql`
   mutation CastVote($pollId: Int!, $optionId: Int!) {
     vote(pollId: $pollId, optionId: $optionId) {
-      options {
-        text
-        votes
-      }
+      id
     }
   }
 `;
@@ -33,6 +35,7 @@ const GET_POLL = gql`
       created
       title
       options {
+        id
         text
         votes
       }
@@ -41,6 +44,7 @@ const GET_POLL = gql`
 `;
 
 type PollOption = {
+  id: number;
   text: string;
   votes: number;
 };
@@ -58,12 +62,19 @@ function ViewPoll() {
   const params = useParams();
   const pollId = parseInt(params.pollId as string);
 
-  const [castVote, mutation] = useMutation(CAST_VOTE);
+  const [castVote, mutation] = useMutation(CAST_VOTE, {
+    refetchQueries: ["GetPoll"],
+    onCompleted: () => cookies.set(`voted-${params.pollId}`, vote),
+  });
   const { loading, error, data } = useQuery(GET_POLL, {
     variables: { pollId: pollId },
+    pollInterval: 5000,
+    fetchPolicy: "cache-and-network",
   });
 
-  let hasVoted = mutation.data != null;
+  const cookies = new Cookies();
+  let priorVote = cookies.get(`voted-${params.pollId}`);
+  let hasVoted = mutation.data != null || priorVote;
   let [skipVote, setSkipVote] = useState(false);
   let viewResults = hasVoted || skipVote;
 
@@ -77,7 +88,7 @@ function ViewPoll() {
   if (data.poll == null) {
     throw new Response("Poll does not exist!", { status: 404 });
   }
-  const poll = (mutation.data ? mutation.data.vote : data.poll) as Poll;
+  const poll = data.poll as Poll;
   const totalVotes = poll.options
     .map((option) => option.votes)
     .reduce((a, b) => a + b);
@@ -104,7 +115,15 @@ function ViewPoll() {
                 let isWinner = option.votes == mostVotes;
                 return (
                   <Box key={i}>
-                    <Text>{option.text}</Text>
+                    <HStack marginBottom={1}>
+                      <Text>{option.text}</Text>
+                      {priorVote == option.id && (
+                        <Tag colorScheme="green">
+                          <TagLeftIcon as={CheckIcon} />
+                          voted
+                        </Tag>
+                      )}
+                    </HStack>
                     <Box position="relative">
                       <Progress
                         hasStripe={isWinner}
@@ -152,7 +171,7 @@ function ViewPoll() {
             >
               <Stack direction="column">
                 {poll.options.map((option, i) => (
-                  <Radio size="lg" value={`${i}`} key={i}>
+                  <Radio size="lg" value={option.id.toString()} key={i}>
                     {option.text}
                   </Radio>
                 ))}
