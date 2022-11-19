@@ -1,15 +1,12 @@
 import {
   Button,
-  Card,
   Center,
+  Input,
   Divider,
   Flex,
   FormControl,
   FormLabel,
-  Heading,
-  Input,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import _ from "lodash";
@@ -42,7 +39,9 @@ function Create() {
 
   useEffect(() => {
     if (mutation.data) {
-      navigate(`/poll/${mutation.data.createPoll.id}`);
+      navigate(
+        `/poll/${mutation.data.createPoll.id}?share=${mutation.data.createPoll.id}`
+      );
     }
   }, [mutation]);
 

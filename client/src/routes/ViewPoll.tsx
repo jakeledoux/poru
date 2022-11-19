@@ -125,13 +125,15 @@ function ViewPoll() {
                       )}
                     </HStack>
                     <Box position="relative">
+                      {/* vote "progress bar" */}
                       <Progress
                         hasStripe={isWinner}
                         colorScheme={isWinner ? "yellow" : "teal"}
                         borderRadius={5}
                         height="32px"
-                        value={option.votes * voteScale}
+                        value={option.votes ? option.votes * voteScale : 0}
                       />
+                      {/* vote count */}
                       <Text
                         color="white"
                         top={0}
@@ -145,6 +147,7 @@ function ViewPoll() {
                         {option.votes.toLocaleString()}{" "}
                         {pluralize("vote", option.votes)}
                       </Text>
+                      {/* vote precentage */}
                       <Text
                         color="white"
                         top={0}
@@ -156,7 +159,10 @@ function ViewPoll() {
                         position="absolute"
                         fontWeight="bold"
                       >
-                        {Math.round(option.votes * voteScale)}%
+                        {option.votes
+                          ? Math.round(option.votes * voteScale)
+                          : 0}
+                        %
                       </Text>
                     </Box>
                   </Box>
