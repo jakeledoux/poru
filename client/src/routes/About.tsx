@@ -7,7 +7,6 @@ import {
   Text,
   UnorderedList,
 } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
 import { BodyCard, Note } from "../components";
 
 function TechList(props: { title: string; items: [string, string, string][] }) {
@@ -18,7 +17,7 @@ function TechList(props: { title: string; items: [string, string, string][] }) {
       <UnorderedList width="30em">
         {props.items.map(([name, reason, link], i) => (
           <ListItem key={i}>
-            <Link as={RouterLink} to={link} isExternal>
+            <Link href={link} isExternal>
               {name}
             </Link>{" "}
             for {reason}
